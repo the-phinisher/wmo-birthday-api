@@ -39,11 +39,7 @@ app.post("/", async (req, res) => {
   if (await Birthday.findOne({ name: newBirthday.name }))
     return utils.responseHandler.sendInvalid(req, res)
   let savedObject = await newBirthday.save()
-  if (savedObject)
-    return utils.responseHandler.sendJSON(
-      req,
-      res, savedObject
-    )
+  if (savedObject) return utils.responseHandler.sendJSON(req, res, savedObject)
   return utils.responseHandler.sendInvalid(req, res)
 })
 
@@ -62,15 +58,8 @@ app.patch("/", async (req, res) => {
 
   entry.bday = new Date(req.body.bday + "UTC")
   let result = await Birthday.findByIdAndUpdate(entry._id, entry)
-  if (result)
-    return utils.responseHandler.sendJSON(
-      req,
-      res, result
-    )
-  return utils.responseHandler.sendInvalid(
-    req,
-    res, "Database Error",
-  )
+  if (result) return utils.responseHandler.sendJSON(req, res, result)
+  return utils.responseHandler.sendInvalid(req, res, "Database Error")
 })
 
 app.delete("/", async (req, res) => {
@@ -87,10 +76,7 @@ app.delete("/", async (req, res) => {
   if (!entry) return utils.responseHandler.sendInvalid(req, res)
   let deletedObject = await Birthday.findByIdAndDelete(entry._id)
   if (deletedObject)
-    return utils.responseHandler.sendJSON(
-      req,
-      res, deletedObject
-    )
+    return utils.responseHandler.sendJSON(req, res, deletedObject)
   return utils.responseHandler.sendInvalid(req, res)
 })
 

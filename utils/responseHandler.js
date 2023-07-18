@@ -12,5 +12,5 @@ const sendInvalid = (req, res, text = null) => {
 
 module.exports = {
   sendJSON,
-  sendInvalid
+  sendInvalid,
 }
