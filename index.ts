@@ -4,16 +4,13 @@ import mongoose from "mongoose"
 import bodyParser from "body-parser"
 import utils from "./utils"
 import { Birthday, birthdayEntry } from "./models/Birthday"
+import { PORT, MONGODB_URI } from "./config"
 const app = express()
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
-mongoose.connect(
-	process.env.MONGODB_URI
-		? process.env.MONGODB_URI
-		: "mongodb://localhost:27017",
-)
+mongoose.connect(MONGODB_URI ? MONGODB_URI : "mongodb://localhost:27017")
 
 app.post("/", async (req, res) => {
 	let newBirthday = new Birthday({
@@ -95,6 +92,6 @@ app.get("/", async (req, res) => {
 	return utils.responseHandler.sendJSON(res, closest)
 })
 
-app.listen(process.env.PORT, () => {
-	console.log("Server started at " + process.env.PORT)
+app.listen(PORT, () => {
+	console.log("Server started at " + PORT)
 })

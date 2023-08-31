@@ -2,10 +2,10 @@
   "name": "wmo-birthday-api",
   "version": "1.0.0",
   "description": "WMO coordinator task ",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "nodemon index.js",
-    "debug": "nodemon debug.js"
+    "test": "nodemon index.ts",
+    "debug": "nodemon debug.ts"
   },
   "repository": {
     "type": "git",
