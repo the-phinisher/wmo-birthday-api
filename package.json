@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "nodemon index.ts",
-    "debug": "nodemon debug.ts"
+    "debug": "nodemon debug.js"
   },
   "repository": {
     "type": "git",
