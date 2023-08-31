@@ -2,7 +2,8 @@ require("dotenv").config()
 import express from "express"
 import mongoose from "mongoose"
 import bodyParser from "body-parser"
-const utils = require("./utils")
+import utils from "./utils"
+import { Birthday, birthdayEntry } from "./models/Birthday"
 const app = express()
 
 app.use(bodyParser.json())
@@ -14,27 +15,6 @@ mongoose.connect(
 		: "mongodb://localhost:27017",
 )
 
-interface birthdayEntry {
-	name: string
-	birthday: Date
-}
-
-const birthdaySchema = new mongoose.Schema<birthdayEntry>({
-	name: {
-		type: String,
-		required: true,
-		validate: {
-			validator: (namestring: string) => {
-				return /^[a-z ]+$/i.test(namestring)
-			},
-			message: "Invalid Name",
-		},
-	},
-	birthday: Date,
-})
-
-const Birthday = mongoose.model<birthdayEntry>("Birthday", birthdaySchema)
-
 app.post("/", async (req, res) => {
 	let newBirthday = new Birthday({
 		name: req.body.name,
@@ -43,13 +23,13 @@ app.post("/", async (req, res) => {
 	try {
 		await newBirthday.validate()
 	} catch (err) {
-		return utils.responseHandler.sendInvalid(req, res)
+		return utils.responseHandler.sendInvalid(res)
 	}
 	if (await Birthday.findOne({ name: newBirthday.name }))
-		return utils.responseHandler.sendInvalid(req, res)
+		return utils.responseHandler.sendInvalid(res)
 	let savedObject = await newBirthday.save()
 	if (savedObject) return utils.responseHandler.sendJSON(res, savedObject)
-	return utils.responseHandler.sendInvalid(req, res)
+	return utils.responseHandler.sendInvalid(res)
 })
 
 app.patch("/", async (req, res) => {
@@ -61,14 +41,14 @@ app.patch("/", async (req, res) => {
 	try {
 		await validationObject.validate()
 	} catch (err) {
-		return utils.responseHandler.sendInvalid(req, res)
+		return utils.responseHandler.sendInvalid(res)
 	}
-	if (!entry) return utils.responseHandler.sendInvalid(req, res)
+	if (!entry) return utils.responseHandler.sendInvalid(res)
 
 	entry.birthday = new Date(req.body.birthday + "UTC")
 	const updatedObject = await Birthday.findByIdAndUpdate(entry._id, entry)
 	if (updatedObject) return utils.responseHandler.sendJSON(res, updatedObject)
-	return utils.responseHandler.sendInvalid(req, res, "Database Error")
+	return utils.responseHandler.sendInvalid(res, "Database Error")
 })
 
 app.delete("/", async (req, res) => {
@@ -79,31 +59,28 @@ app.delete("/", async (req, res) => {
 	try {
 		await validationObject.validate()
 	} catch (err) {
-		return utils.responseHandler.sendInvalid(req, res)
+		return utils.responseHandler.sendInvalid(res)
 	}
 	let entry = await Birthday.findOne({ name: req.body.name })
-	if (!entry) return utils.responseHandler.sendInvalid(req, res)
+	if (!entry) return utils.responseHandler.sendInvalid(res)
 	let deletedObject = await Birthday.findByIdAndDelete(entry._id)
 	if (deletedObject) return utils.responseHandler.sendJSON(res, deletedObject)
-	return utils.responseHandler.sendInvalid(req, res)
+	return utils.responseHandler.sendInvalid(res)
 })
 
 app.get("/", async (req, res) => {
 	const all = await Birthday.find({})
 	if (all.length == 0) {
-		return utils.responseHandler.sendInvalid(req, res)
+		return utils.responseHandler.sendInvalid(res)
 	}
-	let closest:
-		| (mongoose.Document<unknown, {}, birthdayEntry> &
-				Omit<birthdayEntry & { _id: mongoose.Types.ObjectId }, never>)
-		| null = null
-	let closest_time: number = Infinity
 	let today: Date = new Date()
 	today.setUTCHours(0)
 	today.setUTCMinutes(0)
 	today.setUTCSeconds(0)
 	today.setUTCMilliseconds(0)
 	let year = today.getUTCFullYear()
+	let closest: mongoose.Document<unknown, {}, birthdayEntry> = all[0]
+	let closest_time: number = Infinity
 	for (let i = 0; i < all.length; i++) {
 		let birthday = new Date(all[i]["birthday"])
 		birthday.setUTCFullYear(year)
