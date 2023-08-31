@@ -3,8 +3,8 @@ import express from "express"
 import mongoose from "mongoose"
 import bodyParser from "body-parser"
 import utils from "./utils"
-import { Birthday, birthdayEntry } from "./models/Birthday"
-import { PORT, MONGODB_URI } from "./config"
+import { Birthday } from "./Models/Birthday"
+import { PORT, MONGODB_URI } from "./Config"
 const app = express()
 
 app.use(bodyParser.json())
