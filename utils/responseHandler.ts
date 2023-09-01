@@ -1,7 +1,7 @@
 import { Response } from "express"
 import mongoose from "mongoose"
 
-export const send = (
+const send = (
 	res: Response,
 	type: string = "invalid",
 	content: string = "",
@@ -22,3 +22,5 @@ export const send = (
 	}
 	return res.end(content)
 }
+
+export default { send }
