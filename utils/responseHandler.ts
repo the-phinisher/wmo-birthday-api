@@ -1,18 +1,24 @@
 import { Response } from "express"
 import mongoose from "mongoose"
 
-const sendJSON = (
+export const send = (
 	res: Response,
-	obj: {} | mongoose.Document<unknown, {}, unknown>,
+	type: string = "invalid",
+	content: string = "",
+	obj:
+		| {}
+		| (mongoose.Document<unknown, {}, birthdayEntry> &
+				Omit<
+					birthdayEntry & {
+						_id: mongoose.Types.ObjectId
+					},
+					never
+				>) = {},
 ) => {
-	res.setHeader("statusCode", 200)
-	res.setHeader("Content-Type", "application/json")
-	res.end(JSON.stringify(obj))
+	res.setHeader("statusCode", type == "invalid" ? 200 : 400)
+	if (type == "json") {
+		res.setHeader("Content-Type", "application/json")
+		return res.end(JSON.stringify(obj))
+	}
+	return res.end(content)
 }
-
-const sendInvalid = (res: Response, text: string = "Invalid request") => {
-	res.writeHead(400)
-	return res.end(text)
-}
-
-export default { sendJSON, sendInvalid }

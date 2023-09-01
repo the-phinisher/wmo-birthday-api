@@ -1,8 +1,10 @@
 import { Schema, model } from "mongoose"
 
-export interface birthdayEntry {
-	name: string
-	birthday: Date
+declare global {
+	interface birthdayEntry {
+		name: string
+		birthday: Date
+	}
 }
 
 const birthdaySchema = new Schema<birthdayEntry>({

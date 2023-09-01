@@ -3,10 +3,14 @@ import utils from "../utils"
 import { Birthday } from "../Models/Birthday"
 import { Request, Response } from "express"
 
-const getNearestBirthday = async (res: Response) => {
+const getNearestBirthday = async (req: Request, res: Response) => {
 	const all = await Birthday.find({})
 	if (all.length == 0) {
-		return utils.responseHandler.sendInvalid(res)
+		return utils.responseHandler.send(
+			res,
+			"invalid",
+			"no entries in database",
+		)
 	}
 	let today: Date = new Date()
 	today.setUTCHours(0)
@@ -27,43 +31,37 @@ const getNearestBirthday = async (res: Response) => {
 			closest = all[i]
 		}
 	}
-	return utils.responseHandler.sendJSON(res, closest)
+	return utils.responseHandler.send(res, "json", "", closest)
 }
 
 const deleteBirthday = async (req: Request, res: Response) => {
-	let validationObject = new Birthday({
-		name: req.body.name,
-		birthday: req.body.birthday,
-	})
-	try {
-		await validationObject.validate()
-	} catch (err) {
-		return utils.responseHandler.sendInvalid(res)
-	}
-	let entry = await Birthday.findOne({ name: req.body.name })
-	if (!entry) return utils.responseHandler.sendInvalid(res)
-	let deletedObject = await Birthday.findByIdAndDelete(entry._id)
-	if (deletedObject) return utils.responseHandler.sendJSON(res, deletedObject)
-	return utils.responseHandler.sendInvalid(res)
+	let birthdayEntry = await Birthday.findOne({ name: req.body.name })
+	if (birthdayEntry == null)
+		return utils.responseHandler.send(
+			res,
+			"invalid",
+			`Cannot find ${req.body.name} in the database`,
+		)
+	let deletedEntry = await Birthday.findByIdAndDelete(birthdayEntry._id)
+	if (deletedEntry)
+		return utils.responseHandler.send(res, "json", "", deletedEntry)
+	return utils.responseHandler.send(
+		res,
+		"invalid",
+		"Database Error: Deletion failed",
+	)
 }
 
 const updateBirthday = async (req: Request, res: Response) => {
-	const validationObject = new Birthday({
-		name: req.body.name,
-		birthday: req.body.birthday,
-	})
 	let entry = await Birthday.findOne({ name: req.body.name })
-	try {
-		await validationObject.validate()
-	} catch (err) {
-		return utils.responseHandler.sendInvalid(res)
-	}
-	if (!entry) return utils.responseHandler.sendInvalid(res)
+	if (!entry)
+		return utils.responseHandler.send(res, "invalid", "No database entry")
 
 	entry.birthday = new Date(req.body.birthday + "UTC")
-	const updatedObject = await Birthday.findByIdAndUpdate(entry._id, entry)
-	if (updatedObject) return utils.responseHandler.sendJSON(res, updatedObject)
-	return utils.responseHandler.sendInvalid(res, "Database Error")
+	const updatedEntry = await Birthday.findByIdAndUpdate(entry._id, entry)
+	if (updatedEntry)
+		return utils.responseHandler.send(res, "json", "", updatedEntry)
+	return utils.responseHandler.send(res, "invalid", "Database Error")
 }
 
 const addBirthday = async (req: Request, res: Response) => {
@@ -71,16 +69,16 @@ const addBirthday = async (req: Request, res: Response) => {
 		name: req.body.name,
 		birthday: new Date(req.body.birthday + "UTC"),
 	})
-	try {
-		await newBirthday.validate()
-	} catch (err) {
-		return utils.responseHandler.sendInvalid(res)
-	}
 	if (await Birthday.findOne({ name: newBirthday.name }))
-		return utils.responseHandler.sendInvalid(res)
-	let savedObject = await newBirthday.save()
-	if (savedObject) return utils.responseHandler.sendJSON(res, savedObject)
-	return utils.responseHandler.sendInvalid(res)
+		return utils.responseHandler.send(
+			res,
+			"invalid",
+			"Birthday already exists",
+		)
+	let savedEntry = await newBirthday.save()
+	if (savedEntry)
+		return utils.responseHandler.send(res, "json", "", savedEntry)
+	return utils.responseHandler.send(res, "invalid", "Entry already exists")
 }
 
 export default {

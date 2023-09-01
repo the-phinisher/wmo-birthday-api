@@ -1,11 +1,9 @@
 import express from "express"
-import utils from "../utils"
-import { Birthday } from "../Models/Birthday"
 import birthdayController from "../Controllers/birthdayController"
 const apiRouter = express.Router()
 
 apiRouter.get("/", async (req, res) => {
-	return await birthdayController.getNearestBirthday(res)
+	return await birthdayController.getNearestBirthday(req, res)
 })
 
 apiRouter.delete("/", async (req, res) => {
