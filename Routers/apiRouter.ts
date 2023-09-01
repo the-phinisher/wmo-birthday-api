@@ -2,20 +2,12 @@ import express from "express"
 import birthdayController from "../Controllers/birthdayController"
 const apiRouter = express.Router()
 
-apiRouter.get("/", async (req, res) => {
-	return await birthdayController.getNearestBirthday(req, res)
-})
+apiRouter.get("/", birthdayController.getNearestBirthday)
 
-apiRouter.delete("/", async (req, res) => {
-	return await birthdayController.deleteBirthday(req, res)
-})
+apiRouter.delete("/", birthdayController.deleteBirthday)
 
-apiRouter.patch("/", async (req, res) => {
-	return await birthdayController.updateBirthday(req, res)
-})
+apiRouter.patch("/", birthdayController.updateBirthday)
 
-apiRouter.post("/", async (req, res) => {
-	return await birthdayController.addBirthday(req, res)
-})
+apiRouter.post("/", birthdayController.addBirthday)
 
 export default apiRouter
